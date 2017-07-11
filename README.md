@@ -4,4 +4,4 @@ Repository for useful scripts for pulling relevant system information for PCI co
 Intentions:
 - Debian Script
 - Windows Script
-- RHEL Script
+- Fedora Script
