@@ -32,10 +32,30 @@ mkdir "$tempdir"
 # Grab NTP Configurations for Req: 10.4, 10.4.1, 10.4.2. 10.4.3
 cat /etc/ntp.conf >> "$tempdir/ntp_config.log"
 cat /etc/xntp.conf >> "$tempdir/xntp_config.log"
- cat /var/lib/ntp/ntp.conf.dhcp >> "$tempdir/dhcp_ntp.log"
+cat /var/lib/ntp/ntp.conf.dhcp >> "$tempdir/dhcp_ntp.log"
+
+# Grab a list of all local users
+cat  /etc/passwd >> "$tempdir/passwd.log"
+echo #####################################
+getent passwd >>"$tempdir/passwd.log"
+
+cat /etc/shadow >> "$tempdir/shadow.log"
+
+# List users with rights to sudo
+getent group sudo | cut -d: -f4 >> "$tempdir/sudoers.log"
+
+# Grab the Login.defs file
+cat /etc/login.defs >> "$tempdir/login_defs.log"
 
 
+# List all installed packages
+dpkg-query -l >> "$tempdir/all_packages.log"
 
 
+# Services and status codes
+service --status-all >> "$tempdir/service_status.log"
+
+# List Cron job files
+ls /etc/cron.* >> "$tempdir/cron_files.log"
 
 exit 
