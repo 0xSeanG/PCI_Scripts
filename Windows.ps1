@@ -17,3 +17,6 @@ netstat -an >>
 
 # Active Routes
 netstat -r
+
+# NTP Config
+w32tm /query /peers >>
