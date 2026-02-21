@@ -4,19 +4,19 @@
 # Credit to https://github.com/jbarcia/PCI-Audit-Script
 
 # Timestamp data collection
-echo %date% %time% >> 
+Get-Date >> timestamp.log
 
 #System Overview
-systeminfo >>
+systeminfo >> systeminfo.log
 
 #Group Policy Results (Super-Verbose)
-gpresult /z >> 
+gpresult /z >> gpresult.log
 
 # Active connections
-netstat -an >>  
+netstat -an >> netstat.log
 
 # Active Routes
-netstat -r
+netstat -r >> netstat_routes.log
 
 # NTP Config
-w32tm /query /peers >>
+w32tm /query /peers >> ntp_peers.log

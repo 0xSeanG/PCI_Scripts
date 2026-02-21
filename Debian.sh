@@ -3,24 +3,32 @@
 # Credit to https://github.com/jbarcia/PCI-Audit-Script for starting points
 #
 # This is being written for PCI DSS v3.2
-# Some of these commands will require elevated privleges 
+# Some of these commands will require elevated privileges
+
+set -e -u -o pipefail
+
+# Require root/sudo — many commands (shadow, iptables) will fail silently otherwise
+if [ "$(id -u)" -ne 0 ]; then
+  echo "ERROR: This script must be run as root (e.g. sudo $0)" >&2
+  exit 1
+fi
 
 
 # Variables to be used later
 filedate=`date +%m.%d.%y-%H.%M`
 rootdir=~/Desktop/PCI_Script_Out
-tempdir=$filedate_$HOSTNAME
+tempdir=${filedate}_$HOSTNAME
 
 # Check to see if your $rootdir exists
 if [ ! -d "$rootdir" ]; then
         mkdir "$rootdir"
 fi
 
-cd $rootdir
+cd "$rootdir"
 
 # Warning message that the $tempdir already exists
 if [ -d "$tempdir" ]; then
-	echo *****WARNING: $rootdir/$tempdir already exists rename the folder to prevent data loss*****
+	echo "*****WARNING: $rootdir/$tempdir already exists — rename the folder to prevent data loss*****"
   exit 1
 fi
 
@@ -44,9 +52,9 @@ mount >> "$tempdir/general_info.log"
 
 
 # Grab NTP Configurations for Req: 10.4, 10.4.1, 10.4.2. 10.4.3
-cat /etc/ntp.conf >> "$tempdir/ntp_config.log"
-cat /etc/xntp.conf >> "$tempdir/xntp_config.log"
-cat /var/lib/ntp/ntp.conf.dhcp >> "$tempdir/dhcp_ntp.log"
+cat /etc/ntp.conf >> "$tempdir/ntp_config.log" || true
+cat /etc/xntp.conf >> "$tempdir/xntp_config.log" || true
+cat /var/lib/ntp/ntp.conf.dhcp >> "$tempdir/dhcp_ntp.log" || true
 
 # Grab a list of all local users for Req 2.1
 cat  /etc/passwd >> "$tempdir/passwd.log"
@@ -69,14 +77,14 @@ dpkg-query -l >> "$tempdir/all_packages.log"
 
 
 # Services and status codes for Req 2.2.2
-service --status-all >> "$tempdir/service_status.log"
+service --status-all >> "$tempdir/service_status.log" 2>&1 || true
 ps aux >> "$tempdir/ps_aux.log"
 ps -ef >> "$tempdir/ps_ef.log"
 cat /etc/services >> "$tempdir/services.log"
 
 
 # List Cron job files
-ls /etc/cron.* >> "$tempdir/cron_files.log"
+ls /etc/cron.* >> "$tempdir/cron_files.log" || true
 
 
 # Network Configurations
@@ -102,7 +110,7 @@ echo "********************************" >> "$tempdir/Distro_Info.log"
 cat /etc/*-release >> "$tempdir/Distro_Info.log"
 echo "********************************" >> "$tempdir/Distro_Info.log"
 echo "********************************" >> "$tempdir/Distro_Info.log"
-cat /etc/lsb-release >> "$tempdir/Distro_Info.log"
+cat /etc/lsb-release >> "$tempdir/Distro_Info.log" || true
 
 
 # Kernel info
@@ -115,15 +123,15 @@ echo "********************************" >> "$tempdir/kernel.log"
 uname -mrs >> "$tempdir/kernel.log"
 echo "********************************" >> "$tempdir/kernel.log"
 echo "********************************" >> "$tempdir/kernel.log"
-dmesg | grep Linux >> "$tempdir/kernel.log"
+dmesg | grep Linux >> "$tempdir/kernel.log" || true
 echo "********************************" >> "$tempdir/kernel.log"
 echo "********************************" >> "$tempdir/kernel.log"
-ls /boot | grep vmlinuz >> "$tempdir/kernel.log"
+ls /boot | grep vmlinuz >> "$tempdir/kernel.log" || true
 
 # Check for RK Hunter
-rkhunter --versioncheck >> "$tempdir/RKHunter.log"
+rkhunter --versioncheck >> "$tempdir/RKHunter.log" 2>&1 || true
 
 # Check for CHK Rootkit
-chkrootkit -V >> "$tempdir/CHKRootkit.log"
+chkrootkit -V >> "$tempdir/CHKRootkit.log" 2>&1 || true
 
 exit 
